@@ -800,151 +800,93 @@ INSTRUCCIONES ESPECIALES:
   let modoLlamada = false;
   let recognition = null;
   let maxHablando = false;
+  let wakeRecognition = null;
 
+  // ── VOZ ──────────────────────────────────────────────────
   function cargarVozSalome() {
     const voices = speechSynthesis.getVoices();
-    vozSalome = voices.find(v =>
-      v.name === 'Microsoft Salome Online (Natural) - Spanish (Colombia)'
-    );
-    if (!vozSalome) vozSalome = voices.find(v =>
-      v.name === 'Google español de Estados Unidos'
-    );
-    if (!vozSalome) vozSalome = voices.find(v =>
-      v.name === 'Google español'
-    );
-    if (!vozSalome) vozSalome = voices.find(v => v.lang.startsWith('es'));
+    vozSalome =
+      voices.find(v => v.name === 'Microsoft Salome Online (Natural) - Spanish (Colombia)') ||
+      voices.find(v => v.name === 'Google español de Estados Unidos') ||
+      voices.find(v => v.name === 'Google español') ||
+      voices.find(v => v.lang.startsWith('es'));
   }
   speechSynthesis.onvoiceschanged = cargarVozSalome;
   cargarVozSalome();
   setTimeout(cargarVozSalome, 500);
   setTimeout(cargarVozSalome, 1500);
 
+  // ── HABLAR ───────────────────────────────────────────────
   function hablarSalome(texto) {
     if (!modoLlamada) return;
     speechSynthesis.cancel();
+    pararMic();                   // detener mic antes de hablar
     maxHablando = true;
     setBtnHablando(true);
 
-    pararMic();
+    if (!vozSalome) cargarVozSalome();
+    const utt = new SpeechSynthesisUtterance(texto);
+    if (vozSalome) utt.voice = vozSalome;
+    utt.lang  = 'es-CO';
+    utt.rate  = 1.0;
+    utt.pitch = 1.0;
 
-    // Mic de interrupción — escucha mientras MAX habla
-    setTimeout(() => {
+    utt.onend = () => {
+      maxHablando = false;
+      setBtnHablando(false);
       if (modoLlamada) {
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SR) {
-          recognition = new SR();
-          recognition.lang = 'es-CO';
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          recognition.onresult = (e) => {
-            const t = e.results[0][0].transcript;
-            if (t.trim()) {
-              speechSynthesis.cancel();
-              maxHablando = false;
-              setBtnHablando(false);
-              pararMic();
-              document.getElementById('msg-input').value = t.trim();
-              setTimeout(() => handleSend(), 800);
-            }
-          };
-          recognition.onend = () => {
-            if (modoLlamada && maxHablando) {
-              try { recognition.start(); } catch(e) {}
-            }
-          };
-          try { recognition.start(); } catch(e) {}
-        }
+        setTimeout(() => iniciarMic(), 600);
       }
-    }, 300);
+    };
 
-    setTimeout(() => {
-      if (!vozSalome) cargarVozSalome();
-      const utt = new SpeechSynthesisUtterance(texto);
-      if (vozSalome) utt.voice = vozSalome;
-      utt.lang  = 'es-CO';
-      utt.rate  = 1.0;
-      utt.pitch = 1.0;
-
-      utt.onend = () => {
-        setBtnHablando(false);
-        maxHablando = false;
-        pararMic();
-        setTimeout(() => {
-          if (modoLlamada) iniciarMic();
-        }, 800);
-      };
-
-      speechSynthesis.speak(utt);
-    }, 150);
+    speechSynthesis.speak(utt);
   }
 
+  // ── MIC USUARIO ──────────────────────────────────────────
   function iniciarMic() {
-  if (!modoLlamada || maxHablando) return;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
+    if (!modoLlamada || maxHablando || recognition) return;  // evita doble instancia
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
 
-  recognition = new SR();
-  recognition.lang = 'es-CO';
-  recognition.continuous = true;
-  recognition.interimResults = false; // ← solo texto final, no parcial
+    recognition = new SR();
+    recognition.lang = 'es-CO';
+    recognition.continuous = false;
+    recognition.interimResults = true;
 
-  recognition.onresult = (e) => {
-    if (maxHablando) return;
-
-    // Recoger SOLO resultados finales
-    let final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) {
-        final += e.results[i][0].transcript;
+    recognition.onresult = (e) => {
+      if (maxHablando) return;
+      let interino = '', final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += t; else interino += t;
       }
-    }
-
-    if (final.trim()) {
       const input = document.getElementById('msg-input');
-      input.value = final.trim();
+      input.value = final || interino;
       autoResize(input);
-      pararMic();
-      setTimeout(() => handleSend(), 800);
-    }
-  };
 
-  recognition.onerror = (e) => {
-    if (e.error === 'no-speech' || e.error === 'aborted' || e.error === 'network') {
-      if (modoLlamada && !maxHablando) {
-        setTimeout(() => iniciarMic(), 150);
+      if (final.trim()) {
+        input.value = final.trim();
+        pararMic();
+        setTimeout(() => handleSend(), 300);
       }
-      return;
-    }
-    showToast('Error: ' + e.error);
-    detenerLlamada();
-  };
+    };
 
-  recognition.onend = () => {
-    if (modoLlamada && !maxHablando) {
-      setTimeout(() => iniciarMic(), 150);
-    }
-  };
-
-  try { recognition.start(); } catch(e) {}
-}
     recognition.onerror = (e) => {
       if (e.error === 'no-speech' || e.error === 'aborted') {
-        if (modoLlamada && !maxHablando) {
-          setTimeout(() => iniciarMic(), 300);
-        }
+        recognition = null;
+        if (modoLlamada && !maxHablando) setTimeout(() => iniciarMic(), 400);
         return;
       }
-      showToast('Error: ' + e.error);
+      showToast('Error mic: ' + e.error);
       detenerLlamada();
     };
 
     recognition.onend = () => {
-      if (modoLlamada && !maxHablando) {
-        setTimeout(() => iniciarMic(), 300);
-      }
+      recognition = null;
+      if (modoLlamada && !maxHablando) setTimeout(() => iniciarMic(), 400);
     };
 
-    try { recognition.start(); } catch(e) {}
+    try { recognition.start(); } catch(e) { recognition = null; }
   }
 
   function pararMic() {
@@ -954,26 +896,22 @@ INSTRUCCIONES ESPECIALES:
     }
   }
 
+  // ── BOTÓN VOZ ────────────────────────────────────────────
   function setBtnHablando(v) {
     const btn = document.getElementById('voice-btn');
     if (!btn) return;
-    if (v) {
-      btn.classList.remove('activo');
-      btn.classList.add('hablando');
-    } else {
-      btn.classList.remove('hablando');
-      btn.classList.add('activo');
-    }
+    btn.classList.toggle('hablando', v);
+    btn.classList.toggle('activo',  !v && modoLlamada);
   }
 
   function toggleModoLlamada() {
     if (!modoLlamada) {
       modoLlamada = true;
       maxHablando = false;
-      iniciarMic();
-      const btn = document.getElementById('voice-btn');
-      if (btn) btn.classList.add('activo');
+      detenerWakeWord();            // pausar wake mientras se usa el modo llamada
+      document.getElementById('voice-btn').classList.add('activo');
       showToast('🎙️ Modo voz activado', true);
+      iniciarMic();
     } else {
       detenerLlamada();
     }
@@ -982,80 +920,61 @@ INSTRUCCIONES ESPECIALES:
   function detenerLlamada() {
     pararMic();
     speechSynthesis.cancel();
-    modoLlamada = false;
-    maxHablando = false;
+    modoLlamada  = false;
+    maxHablando  = false;
     const btn = document.getElementById('voice-btn');
     if (btn) btn.classList.remove('activo', 'hablando');
     showToast('Modo voz desactivado');
+    setTimeout(() => iniciarWakeWord(), 1200);  // reactivar wake después de detener
   }
-  // ══ WAKE WORD ══
-let wakeRecognition = null;
-let wakeActivo = false;
 
-function iniciarWakeWord() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
+  // ── WAKE WORD ────────────────────────────────────────────
+  function iniciarWakeWord() {
+    if (modoLlamada || wakeRecognition) return;   // no arrancar si ya corre
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
 
-  wakeRecognition = new SR();
-  wakeRecognition.lang = 'es-CO';
-  wakeRecognition.continuous = false;
-  wakeRecognition.interimResults = false;
+    wakeRecognition = new SR();
+    wakeRecognition.lang = 'es-CO';
+    wakeRecognition.continuous = false;
+    wakeRecognition.interimResults = false;
 
-  wakeRecognition.onresult = (e) => {
-    const texto = e.results[0][0].transcript.toLowerCase().trim();
-    console.log('Wake escuchó:', texto);
-
-    // Detectar "max" o "hola max"
-    if (texto.includes('max') || texto.includes('hola max')) {
-      if (!modoLlamada) {
-        toggleModoLlamada();
-        showToast('👋 ¡Hola! Modo voz activado', true);
+    wakeRecognition.onresult = (e) => {
+      const texto = e.results[0][0].transcript.toLowerCase().trim();
+      if (texto.includes('max') || texto.includes('hola max')) {
+        if (!modoLlamada) {
+          toggleModoLlamada();
+          showToast('👋 ¡Hola! Modo voz activado', true);
+        }
       }
-    }
-  };
+    };
 
-  wakeRecognition.onend = () => {
-    // Reiniciar siempre que no esté en modo llamada
-    if (!modoLlamada) {
-      setTimeout(() => {
-        try { wakeRecognition.start(); } catch(e) {}
-      }, 300);
-    }
-  };
+    wakeRecognition.onend = () => {
+      wakeRecognition = null;
+      if (!modoLlamada) setTimeout(() => iniciarWakeWord(), 400);
+    };
 
-  wakeRecognition.onerror = (e) => {
-    if (e.error === 'no-speech' || e.error === 'aborted') {
-      if (!modoLlamada) {
-        setTimeout(() => {
-          try { wakeRecognition.start(); } catch(e) {}
-        }, 300);
+    wakeRecognition.onerror = (e) => {
+      wakeRecognition = null;
+      if (e.error !== 'not-allowed') {
+        if (!modoLlamada) setTimeout(() => iniciarWakeWord(), 600);
       }
-      return;
-    }
-  };
+    };
 
-  try { wakeRecognition.start(); wakeActivo = true; } catch(e) {}
-}
-
-function detenerWakeWord() {
-  if (wakeRecognition) {
-    try { wakeRecognition.abort(); } catch(e) {}
-    wakeRecognition = null;
+    try { wakeRecognition.start(); } catch(e) { wakeRecognition = null; }
   }
-  wakeActivo = false;
-}
 
-// Cuando se desactiva el modo llamada → reactivar wake word
-const _detenerLlamadaOriginal = detenerLlamada;
-detenerLlamada = function() {
-  _detenerLlamadaOriginal();
-  setTimeout(() => iniciarWakeWord(), 1000);
-};
+  function detenerWakeWord() {
+    if (wakeRecognition) {
+      try { wakeRecognition.abort(); } catch(e) {}
+      wakeRecognition = null;
+    }
+  }
 
-// Arrancar wake word al cargar la página
-window.addEventListener('load', () => {
-  setTimeout(() => iniciarWakeWord(), 2000);
-});
+  // Arrancar wake word al cargar
+  window.addEventListener('load', () => {
+    setTimeout(() => iniciarWakeWord(), 2000);
+  });
 </script>
 </body>
 </html>
