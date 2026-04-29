@@ -971,6 +971,74 @@ INSTRUCCIONES ESPECIALES:
     if (btn) btn.classList.remove('activo', 'hablando');
     showToast('Modo voz desactivado');
   }
+  // ══ WAKE WORD ══
+let wakeRecognition = null;
+let wakeActivo = false;
+
+function iniciarWakeWord() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+
+  wakeRecognition = new SR();
+  wakeRecognition.lang = 'es-CO';
+  wakeRecognition.continuous = false;
+  wakeRecognition.interimResults = false;
+
+  wakeRecognition.onresult = (e) => {
+    const texto = e.results[0][0].transcript.toLowerCase().trim();
+    console.log('Wake escuchó:', texto);
+
+    // Detectar "max" o "hola max"
+    if (texto.includes('max') || texto.includes('hola max')) {
+      if (!modoLlamada) {
+        toggleModoLlamada();
+        showToast('👋 ¡Hola! Modo voz activado', true);
+      }
+    }
+  };
+
+  wakeRecognition.onend = () => {
+    // Reiniciar siempre que no esté en modo llamada
+    if (!modoLlamada) {
+      setTimeout(() => {
+        try { wakeRecognition.start(); } catch(e) {}
+      }, 300);
+    }
+  };
+
+  wakeRecognition.onerror = (e) => {
+    if (e.error === 'no-speech' || e.error === 'aborted') {
+      if (!modoLlamada) {
+        setTimeout(() => {
+          try { wakeRecognition.start(); } catch(e) {}
+        }, 300);
+      }
+      return;
+    }
+  };
+
+  try { wakeRecognition.start(); wakeActivo = true; } catch(e) {}
+}
+
+function detenerWakeWord() {
+  if (wakeRecognition) {
+    try { wakeRecognition.abort(); } catch(e) {}
+    wakeRecognition = null;
+  }
+  wakeActivo = false;
+}
+
+// Cuando se desactiva el modo llamada → reactivar wake word
+const _detenerLlamadaOriginal = detenerLlamada;
+detenerLlamada = function() {
+  _detenerLlamadaOriginal();
+  setTimeout(() => iniciarWakeWord(), 1000);
+};
+
+// Arrancar wake word al cargar la página
+window.addEventListener('load', () => {
+  setTimeout(() => iniciarWakeWord(), 2000);
+});
 </script>
 </body>
 </html>
