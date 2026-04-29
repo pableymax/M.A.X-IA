@@ -844,7 +844,7 @@ INSTRUCCIONES ESPECIALES:
               setBtnHablando(false);
               pararMic();
               document.getElementById('msg-input').value = t.trim();
-              setTimeout(() => handleSend(), 200);
+              setTimeout(() => handleSend(), 800);
             }
           };
           recognition.onend = () => {
@@ -904,7 +904,7 @@ INSTRUCCIONES ESPECIALES:
       input.value = final.trim();
       autoResize(input);
       pararMic();
-      setTimeout(() => handleSend(), 500);
+      setTimeout(() => handleSend(), 800);
     }
   };
 
