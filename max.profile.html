@@ -879,37 +879,54 @@ INSTRUCCIONES ESPECIALES:
   }
 
   function iniciarMic() {
-    if (!modoLlamada || maxHablando) return;
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
+  if (!modoLlamada || maxHablando) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
 
-    recognition = new SR();
-    recognition.lang = 'es-CO';
-    recognition.continuous = false;
-    recognition.interimResults = true;
+  recognition = new SR();
+  recognition.lang = 'es-CO';
+  recognition.continuous = true;
+  recognition.interimResults = false; // ← solo texto final, no parcial
 
-    recognition.onresult = (e) => {
-      if (maxHablando) return;
+  recognition.onresult = (e) => {
+    if (maxHablando) return;
 
-      let interino = '';
-      let final = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += t;
-        else interino += t;
+    // Recoger SOLO resultados finales
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        final += e.results[i][0].transcript;
       }
+    }
 
+    if (final.trim()) {
       const input = document.getElementById('msg-input');
-      input.value = final || interino;
+      input.value = final.trim();
       autoResize(input);
+      pararMic();
+      setTimeout(() => handleSend(), 500);
+    }
+  };
 
-      if (final.trim()) {
-        input.value = final.trim();
-        pararMic();
-        setTimeout(() => handleSend(), 300);
+  recognition.onerror = (e) => {
+    if (e.error === 'no-speech' || e.error === 'aborted' || e.error === 'network') {
+      if (modoLlamada && !maxHablando) {
+        setTimeout(() => iniciarMic(), 150);
       }
-    };
+      return;
+    }
+    showToast('Error: ' + e.error);
+    detenerLlamada();
+  };
 
+  recognition.onend = () => {
+    if (modoLlamada && !maxHablando) {
+      setTimeout(() => iniciarMic(), 150);
+    }
+  };
+
+  try { recognition.start(); } catch(e) {}
+}
     recognition.onerror = (e) => {
       if (e.error === 'no-speech' || e.error === 'aborted') {
         if (modoLlamada && !maxHablando) {
