@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M.A.X | Encuesta Editable</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap');
+
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #00010f;
+      --blue: #2a5fff;
+      --blue-l: #4d7fff;
+      --white: #ffffff;
+      --off: #c8d8ff;
+      --muted: #6688bb;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(ellipse 80% 70% at 50% 40%, #0d2080 0%, #020b3a 50%, #00010f 100%);
+      color: white;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(10, 26, 110, 0.35);
+      border: 1px solid rgba(77,127,255,.25);
+      border-radius: 24px;
+      padding: 32px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 0 40px rgba(42,95,255,.12);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 30px;
+      letter-spacing: 2px;
+    }
+
+    p {
+      color: var(--off);
+      margin: 12px 0 30px;
+      line-height: 1.6;
+    }
+
+    .question {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: white;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 15px;
+      border-radius: 14px;
+      border: 1px solid rgba(77,127,255,.25);
+      background: rgba(10,26,110,.45);
+      color: white;
+      font-size: 15px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(200,216,255,.5);
+    }
+
+    .actions {
+      display: flex;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    button {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .save-btn {
+      background: var(--blue);
+      color: white;
+    }
+
+    .back-btn {
+      background: transparent;
+      border: 1px solid rgba(77,127,255,.35);
+      color: var(--off);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .saved {
+      margin-top: 18px;
+      text-align: center;
+      color: #7dffb3;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Conectar con M.A.X</h1>
+  <p>Esta información ayudará a que M.A.X te conozca mejor, recuerde tus objetivos y se convierta en tu verdadero centro de control.</p>
+
+  <form id="surveyForm">
+
+    <div class="question">
+      <label>Nombre completo</label>
+      <input type="text" id="nombre" placeholder="Tu nombre" />
+    </div>
+
+    <div class="question">
+      <label>Edad</label>
+      <input type="number" id="edad" placeholder="Tu edad" />
+    </div>
+
+    <div class="question">
+      <label>Fecha de cumpleaños</label>
+      <input type="date" id="cumple" />
+    </div>
+
+    <div class="question">
+      <label>Metas a largo plazo</label>
+      <textarea id="metas" placeholder="Ej: crecer PMX, libertad financiera, viajar, crear una gran empresa..."></textarea>
+    </div>
+
+    <div class="question">
+      <label>Rutina diaria</label>
+      <textarea id="rutina" placeholder="Ej: levantarme 5 AM, gym, trabajo, estudio..."></textarea>
+    </div>
+
+    <div class="question">
+      <label>Estudios actuales</label>
+      <input type="text" id="estudios" placeholder="Ej: universidad, cursos, aprendizaje autodidacta" />
+    </div>
+
+    <div class="question">
+      <label>Negocio principal</label>
+      <input type="text" id="negocio" placeholder="Ej: PMX, producción audiovisual, automatización" />
+    </div>
+
+    <div class="actions">
+      <button type="button" class="back-btn" onclick="goBack()">← Regresar</button>
+      <button type="submit" class="save-btn">Guardar conexión</button>
+    </div>
+
+    <div class="saved" id="savedMsg">Datos guardados correctamente ⚡</div>
+  </form>
+</div>
+
+<script>
+const form = document.getElementById('surveyForm');
+const savedMsg = document.getElementById('savedMsg');
+
+window.addEventListener('load', () => {
+  document.getElementById('nombre').value = localStorage.getItem('max_nombre') || '';
+  document.getElementById('edad').value = localStorage.getItem('max_edad') || '';
+  document.getElementById('cumple').value = localStorage.getItem('max_cumple') || '';
+  document.getElementById('metas').value = localStorage.getItem('max_metas') || '';
+  document.getElementById('rutina').value = localStorage.getItem('max_rutina') || '';
+  document.getElementById('estudios').value = localStorage.getItem('max_estudios') || '';
+  document.getElementById('negocio').value = localStorage.getItem('max_negocio') || '';
+});
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  localStorage.setItem('max_nombre', document.getElementById('nombre').value);
+  localStorage.setItem('max_edad', document.getElementById('edad').value);
+  localStorage.setItem('max_cumple', document.getElementById('cumple').value);
+  localStorage.setItem('max_metas', document.getElementById('metas').value);
+  localStorage.setItem('max_rutina', document.getElementById('rutina').value);
+  localStorage.setItem('max_estudios', document.getElementById('estudios').value);
+  localStorage.setItem('max_negocio', document.getElementById('negocio').value);
+
+  savedMsg.style.display = 'block';
+
+  setTimeout(() => {
+    savedMsg.style.display = 'none';
+  }, 3000);
+});
+
+function goBack(){
+  window.location.href = 'max.profile.html';
+}
+</script>
+
+</body>
+</html>

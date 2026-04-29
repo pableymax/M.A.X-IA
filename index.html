@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M.A.X — Tu IA Personal</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile
+  } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import {
+    getFirestore, doc, setDoc, serverTimestamp
+  } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDB5CVtV4DxCNQ2OTydJJg_sovWULwkcE0",
+    authDomain:        "max-ai-e9525.firebaseapp.com",
+    projectId:         "max-ai-e9525",
+    storageBucket:     "max-ai-e9525.firebasestorage.app",
+    messagingSenderId: "837918065362",
+    appId:             "1:837918065362:web:d89b4f77b325d5d747a30b"
+  };
+
+  try {
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+    window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+      signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile, doc, setDoc, serverTimestamp };
+  } catch(e) {
+    window._fb = null;
+  }
+</script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap');
+
+html { background:#00010f !important; color:#fff !important; }
+body {
+  margin:0 !important; padding:0 !important;
+  width:100% !important; height:100% !important;
+  min-height:100vh !important;
+  background:#00010f !important;
+  color:#fff !important;
+  font-family:'Outfit',sans-serif !important;
+  overflow:hidden !important;
+}
+*, *::before, *::after { box-sizing:border-box !important; }
+
+:root {
+  --bg:     #00010f;
+  --blue:   #2a5fff;
+  --blue-l: #4d7fff;
+  --white:  #ffffff;
+  --off:    #c8d8ff;
+  --muted:  #6688bb;
+  --err:    #ff6b8a;
+}
+
+.bg {
+  position:fixed !important; inset:0 !important; z-index:0 !important;
+  background:radial-gradient(ellipse 80% 70% at 50% 40%,#0d2080 0%,#020b3a 50%,#00010f 100%) !important;
+  pointer-events:none;
+}
+.bg::before {
+  content:''; position:absolute; top:25%; left:50%; transform:translateX(-50%);
+  width:340px; height:340px; border-radius:50%;
+  background:radial-gradient(circle,rgba(42,95,255,.35) 0%,transparent 70%);
+  animation:breathe 4s ease-in-out infinite;
+}
+.bg::after {
+  content:''; position:absolute; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%,rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(1px 1px at 80% 15%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(1px 1px at 60% 70%,rgba(255,255,255,.25) 0%,transparent 100%),
+    radial-gradient(1px 1px at 30% 80%,rgba(255,255,255,.2) 0%,transparent 100%),
+    radial-gradient(1px 1px at 90% 60%,rgba(255,255,255,.3) 0%,transparent 100%);
+}
+@keyframes breathe {
+  0%,100%{opacity:.8;transform:translateX(-50%) scale(1);}
+  50%     {opacity:1; transform:translateX(-50%) scale(1.15);}
+}
+
+.screen {
+  position:fixed !important; inset:0 !important;
+  display:flex !important; flex-direction:column !important;
+  align-items:center !important; justify-content:center !important;
+  color:#fff !important; z-index:1;
+  overflow-y:auto !important;
+  transition:opacity .5s ease, transform .5s ease;
+}
+.screen.hidden { opacity:0 !important; pointer-events:none !important; transform:scale(.96) !important; }
+
+.pw { width:100%; max-width:380px; padding:0 28px; display:flex; flex-direction:column; gap:22px; z-index:1; }
+
+.logo-big {
+  font-family:'Orbitron',sans-serif !important; font-size:72px; font-weight:900;
+  letter-spacing:10px; color:#fff !important;
+  text-shadow:0 0 20px #4d7fff,0 0 60px rgba(42,95,255,.7),0 0 100px rgba(42,95,255,.3);
+  filter:drop-shadow(0 0 18px rgba(77,127,255,.9));
+  animation:glow 3s ease-in-out infinite; user-select:none;
+}
+.logo-sm {
+  font-family:'Orbitron',sans-serif !important; font-size:32px; font-weight:900;
+  letter-spacing:6px; color:#fff !important;
+  text-shadow:0 0 20px #4d7fff,0 0 50px rgba(42,95,255,.6);
+  filter:drop-shadow(0 0 20px rgba(42,95,255,.5));
+}
+@keyframes glow {
+  0%,100%{filter:drop-shadow(0 0 18px rgba(77,127,255,.9));}
+  50%    {filter:drop-shadow(0 0 32px rgba(120,170,255,1));}
+}
+.tagline { font-size:14px; font-weight:300; color:var(--off) !important; letter-spacing:.5px; margin-top:16px; opacity:.75; }
+
+.btn {
+  width:100%; max-width:340px; padding:17px; border-radius:50px; border:none;
+  background:var(--blue); color:#fff !important;
+  font-family:'Outfit',sans-serif !important; font-size:17px; font-weight:600; cursor:pointer;
+  box-shadow:0 4px 30px rgba(42,95,255,.5);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:background .2s,transform .15s,box-shadow .2s;
+}
+.btn:hover  { background:var(--blue-l); transform:scale(1.02); box-shadow:0 6px 40px rgba(42,95,255,.7); }
+.btn:active { transform:scale(.98); }
+.btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+.btn-ghost {
+  background:transparent; border:none; color:var(--muted) !important;
+  font-family:'Outfit',sans-serif; font-size:14px; cursor:pointer; transition:color .2s;
+}
+.btn-ghost:hover { color:var(--off) !important; }
+
+.btn-link {
+  background:none; border:none; color:var(--blue-l) !important;
+  font-family:'Outfit',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:color .2s;
+}
+.btn-link:hover { color:#fff !important; }
+
+.back-btn {
+  background:rgba(255,255,255,.08); border:none; color:#fff !important;
+  width:38px; height:38px; border-radius:50%; font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:background .2s; flex-shrink:0;
+}
+.back-btn:hover { background:rgba(255,255,255,.15); }
+
+.fg { display:flex; flex-direction:column; gap:6px; }
+label { font-size:13px; font-weight:500; color:var(--off) !important; letter-spacing:.3px; }
+.inp-wrap { position:relative; }
+
+input[type="email"], input[type="text"], input[type="password"] {
+  width:100%; padding:15px 18px; border-radius:14px;
+  border:1.5px solid rgba(77,127,255,.25);
+  background:rgba(10,26,110,.35) !important;
+  color:#fff !important; -webkit-text-fill-color:#fff !important;
+  font-family:'Outfit',sans-serif; font-size:16px; outline:none;
+  transition:border-color .2s,box-shadow .2s; backdrop-filter:blur(8px);
+}
+input::placeholder { color:rgba(102,136,187,.6) !important; opacity:1 !important; }
+input:focus {
+  border-color:var(--blue);
+  background:rgba(26,59,204,.2) !important;
+  box-shadow:0 0 0 3px rgba(42,95,255,.15);
+}
+input:-webkit-autofill {
+  -webkit-box-shadow:0 0 0 1000px rgba(10,26,110,.8) inset !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.eye-btn {
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; line-height:1; padding:4px; transition:color .2s;
+}
+.eye-btn:hover { color:var(--off); }
+input.has-eye { padding-right:46px; }
+
+.err { font-size:12px; color:var(--err) !important; display:none; margin-top:2px; }
+.err.show { display:block; }
+
+.pw-bars { display:flex; gap:4px; margin-top:4px; }
+.bar { flex:1; height:3px; border-radius:2px; background:rgba(255,255,255,.1); transition:background .3s; }
+.bar.weak   { background:#ff4466; }
+.bar.med    { background:#ffaa33; }
+.bar.strong { background:#33dd88; }
+.pw-lbl { font-size:11px; margin-top:2px; }
+
+.logo-wrap {
+  display:flex; flex-direction:column; align-items:center;
+  flex:1; justify-content:center; z-index:1;
+  animation:logoIn 1s ease both;
+}
+@keyframes logoIn {
+  from{opacity:0;transform:translateY(30px) scale(.92);}
+  to  {opacity:1;transform:translateY(0) scale(1);}
+}
+.bottom-area {
+  width:100%; padding:0 32px 52px;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  z-index:1; animation:slideUp 1s .3s ease both;
+}
+@keyframes slideUp {
+  from{opacity:0;transform:translateY(40px);}
+  to  {opacity:1;transform:translateY(0);}
+}
+
+.back-row { display:flex; align-items:center; gap:10px; }
+.ph-title { font-size:26px; font-weight:600; color:#fff !important; line-height:1.2; }
+.ph-sub   { font-size:14px; color:var(--muted) !important; font-weight:300; margin-top:6px; }
+.switch-row { text-align:center; font-size:13px; color:var(--muted) !important; display:flex; justify-content:center; align-items:center; gap:6px; }
+.forgot-wrap { text-align:right; margin-top:-8px; }
+
+/* ── CODE BOXES ── */
+.code-inputs { display:flex; gap:10px; justify-content:center; }
+.code-box {
+  width:50px; height:58px; border-radius:14px;
+  border:1.5px solid rgba(77,127,255,.25);
+  background:rgba(10,26,110,.35) !important;
+  color:#fff !important; -webkit-text-fill-color:#fff !important;
+  font-family:'Orbitron',sans-serif; font-size:22px; font-weight:700;
+  text-align:center; outline:none;
+  transition:border-color .2s,box-shadow .2s; backdrop-filter:blur(8px);
+  caret-color:var(--blue);
+}
+.code-box:focus { border-color:var(--blue); background:rgba(26,59,204,.2) !important; box-shadow:0 0 0 3px rgba(42,95,255,.15); }
+.code-box.filled { border-color:rgba(77,127,255,.6); }
+.code-box.shk { border-color:var(--err); animation:shake .4s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
+
+.code-err { font-size:13px; color:var(--err) !important; text-align:center; opacity:0; transition:opacity .3s; margin-top:-8px; }
+.code-err.show { opacity:1; }
+.resend-row { display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; color:var(--muted) !important; }
+.resend-btn { background:none; border:none; color:var(--blue-l) !important; font-family:'Outfit',sans-serif; font-size:13px; cursor:pointer; font-weight:500; transition:color .2s; }
+.resend-btn:hover { color:#fff !important; }
+.resend-btn:disabled { color:var(--muted) !important; cursor:default; }
+.verify-icon { width:64px; height:64px; border-radius:50%; background:rgba(42,95,255,.15); border:1.5px solid rgba(77,127,255,.4); display:flex; align-items:center; justify-content:center; font-size:28px; }
+
+.verify-info {
+  background:rgba(42,95,255,.1); border:1px solid rgba(77,127,255,.25);
+  border-radius:12px; padding:12px 16px; font-size:13px; color:var(--off) !important;
+  line-height:1.6; text-align:center;
+}
+.verify-info strong { color:#fff !important; }
+
+/* ── SUCCESS ── */
+#screen-success { gap:20px; text-align:center; padding:32px; }
+.suc-icon { width:80px; height:80px; border-radius:50%; background:rgba(42,95,255,.2); border:2px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:36px; box-shadow:0 0 40px rgba(42,95,255,.4); animation:pop .4s ease both; }
+@keyframes pop { from{transform:scale(.5);opacity:0;} to{transform:scale(1);opacity:1;} }
+.suc-title { font-size:28px; font-weight:700; color:#fff !important; }
+.suc-sub   { font-size:15px; color:var(--muted) !important; max-width:260px; line-height:1.5; }
+.dots { display:flex; gap:8px; justify-content:center; margin-top:8px; }
+.dot { width:8px; height:8px; border-radius:50%; background:var(--blue); animation:db 1.2s ease-in-out infinite; }
+.dot:nth-child(2){animation-delay:.2s;} .dot:nth-child(3){animation-delay:.4s;}
+@keyframes db { 0%,100%{opacity:.3;transform:scale(.8);} 50%{opacity:1;transform:scale(1.2);} }
+
+.spin { width:18px; height:18px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite; display:none; }
+.spin.show { display:block; }
+@keyframes sp { to{transform:rotate(360deg);} }
+
+.toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px); background:#ff4466; color:#fff !important; padding:12px 22px; border-radius:50px; font-size:13px; font-weight:500; z-index:100; transition:transform .4s,opacity .4s; opacity:0; white-space:nowrap; }
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+.toast.ok { background:#1a7a4a; }
+
+#screen-register-full, #screen-login, #screen-forgot, #screen-verify { justify-content:flex-start; padding-top:52px; padding-bottom:52px; }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ══ 1 WELCOME ══ -->
+<div class="screen" id="screen-welcome">
+  <div class="logo-wrap">
+    <div class="logo-big">M.A.X</div>
+    <p class="tagline">Tu inteligencia artificial personal</p>
+  </div>
+  <div class="bottom-area">
+    <button class="btn" onclick="goTo('screen-register-full')">Crear cuenta</button>
+    <button class="btn-ghost" onclick="goTo('screen-login')">Ya tengo cuenta → Iniciar sesión</button>
+  </div>
+</div>
+
+<!-- ══ 2 REGISTER ══ -->
+<div class="screen hidden" id="screen-register-full">
+  <div class="pw">
+    <div class="back-row">
+      <button class="back-btn" onclick="goTo('screen-welcome')">←</button>
+      <div class="logo-sm">M.A.X</div>
+    </div>
+    <div><div class="ph-title">Crea tu cuenta</div><div class="ph-sub">Regístrate para comenzar con MAX</div></div>
+    <div class="fg">
+      <label>Tu nombre</label>
+      <input type="text" id="reg-name" placeholder="¿Cómo te llamas?" autocomplete="name"/>
+    </div>
+    <div class="fg">
+      <label>Correo electrónico</label>
+      <input type="email" id="reg-email" placeholder="tu@correo.com" autocomplete="email"/>
+      <span class="err" id="reg-email-err">Correo inválido</span>
+    </div>
+    <div class="fg">
+      <label>Contraseña</label>
+      <div class="inp-wrap">
+        <input type="password" id="reg-pw" class="has-eye" placeholder="Mínimo 8 caracteres"
+               oninput="checkStr(this.value,'bar0','bar1','bar2','pw-lbl')" autocomplete="new-password"/>
+        <button class="eye-btn" onclick="toggleEye('reg-pw',this)">👁</button>
+      </div>
+      <div class="pw-bars"><div class="bar" id="bar0"></div><div class="bar" id="bar1"></div><div class="bar" id="bar2"></div></div>
+      <span class="pw-lbl" id="pw-lbl"></span>
+      <span class="err" id="reg-pw-err">Mínimo 8 caracteres</span>
+    </div>
+    <div class="fg">
+      <label>Confirmar contraseña</label>
+      <div class="inp-wrap">
+        <input type="password" id="reg-pw2" class="has-eye" placeholder="Repite tu contraseña" autocomplete="new-password"/>
+        <button class="eye-btn" onclick="toggleEye('reg-pw2',this)">👁</button>
+      </div>
+      <span class="err" id="reg-pw2-err">Las contraseñas no coinciden</span>
+    </div>
+    <button class="btn" id="btn-reg" onclick="handleRegister()">
+      <span id="btn-reg-t">Continuar →</span><div class="spin" id="btn-reg-s"></div>
+    </button>
+    <div class="switch-row">¿Ya tienes cuenta? <button class="btn-link" onclick="goTo('screen-login')">Iniciar sesión</button></div>
+  </div>
+</div>
+
+<!-- ══ 3 VERIFY ══ -->
+<div class="screen hidden" id="screen-verify">
+  <div class="pw">
+    <div class="back-row"><button class="back-btn" onclick="goTo('screen-register-full')">←</button></div>
+    <div class="verify-icon">📩</div>
+    <div>
+      <div class="ph-title">Verifica tu correo</div>
+      <div class="ph-sub" style="margin-top:8px;line-height:1.6">Enviamos un código de 6 dígitos a</div>
+    </div>
+    <div class="verify-info">
+      <strong id="verify-em"></strong><br>
+      Revisa tu bandeja de entrada y también la carpeta de <strong>spam</strong>
+    </div>
+    <div class="code-inputs">
+      <input class="code-box" type="text" inputmode="numeric" maxlength="1" id="c0"/>
+      <input class="code-box" type="text" inputmode="numeric" maxlength="1" id="c1"/>
+      <input class="code-box" type="text" inputmode="numeric" maxlength="1" id="c2"/>
+      <input class="code-box" type="text" inputmode="numeric" maxlength="1" id="c3"/>
+      <input class="code-box" type="text" inputmode="numeric" maxlength="1" id="c4"/>
+      <input class="code-box" type="text" inputmode="numeric" maxlength="1" id="c5"/>
+    </div>
+    <div class="code-err" id="code-err">Código incorrecto.</div>
+    <div class="resend-row">¿No llegó? <button class="resend-btn" id="resend-btn" onclick="resendCode()">Reenviar código</button></div>
+    <button class="btn" id="btn-verify" onclick="handleVerify()">
+      <span id="btn-verify-t">Verificar y crear cuenta →</span><div class="spin" id="btn-verify-s"></div>
+    </button>
+  </div>
+</div>
+
+<!-- ══ 4 LOGIN ══ -->
+<div class="screen hidden" id="screen-login">
+  <div class="pw">
+    <div class="back-row">
+      <button class="back-btn" onclick="goTo('screen-welcome')">←</button>
+      <div class="logo-sm">M.A.X</div>
+    </div>
+    <div><div class="ph-title">Bienvenido de vuelta</div><div class="ph-sub">Inicia sesión en tu cuenta</div></div>
+    <div class="fg">
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="tu@correo.com" autocomplete="email"/>
+      <span class="err" id="login-err">Correo o contraseña incorrectos</span>
+    </div>
+    <div class="fg">
+      <label>Contraseña</label>
+      <div class="inp-wrap">
+        <input type="password" id="login-pw" class="has-eye" placeholder="Tu contraseña" autocomplete="current-password"/>
+        <button class="eye-btn" onclick="toggleEye('login-pw',this)">👁</button>
+      </div>
+      <div class="forgot-wrap">
+        <button class="btn-link" style="font-size:12px" onclick="goTo('screen-forgot')">¿Olvidaste tu contraseña?</button>
+      </div>
+    </div>
+    <button class="btn" id="btn-login" onclick="handleLogin()">
+      <span id="btn-login-t">Iniciar sesión</span><div class="spin" id="btn-login-s"></div>
+    </button>
+    <div class="switch-row">¿No tienes cuenta? <button class="btn-link" onclick="goTo('screen-register-full')">Crear cuenta</button></div>
+  </div>
+</div>
+
+<!-- ══ 5 FORGOT ══ -->
+<div class="screen hidden" id="screen-forgot">
+  <div class="pw">
+    <div class="back-row"><button class="back-btn" onclick="goTo('screen-login')">←</button></div>
+    <div><div class="ph-title">Recuperar cuenta</div><div class="ph-sub">Te enviaremos un enlace para restablecer tu contraseña</div></div>
+    <div class="fg">
+      <label>Correo electrónico</label>
+      <input type="email" id="forgot-email" placeholder="tu@correo.com" autocomplete="email"/>
+      <span class="err" id="forgot-err">No encontramos esa cuenta</span>
+    </div>
+    <button class="btn" id="btn-forgot" onclick="handleForgot()">
+      <span id="btn-forgot-t">Enviar enlace →</span><div class="spin" id="btn-forgot-s"></div>
+    </button>
+  </div>
+</div>
+
+<!-- ══ 6 SUCCESS ══ -->
+<div class="screen hidden" id="screen-success">
+  <div class="suc-icon">✓</div>
+  <div class="suc-title">¡Bienvenido!</div>
+  <div class="suc-sub" id="suc-msg">MAX está listo para conocerte</div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
+
+<script>
+// ── NAVIGATION ──────────────────────────────────────────
+const SCREENS = ['screen-welcome','screen-register-full','screen-verify',
+  'screen-login','screen-forgot','screen-success'];
+function goTo(id){
+  SCREENS.forEach(s => document.getElementById(s).classList.toggle('hidden', s!==id));
+}
+
+// ── FIREBASE WAIT ────────────────────────────────────────
+let fbReady = false;
+const fbWait = new Promise(res => {
+  const t = setInterval(()=>{ if(window._fb){fbReady=true;clearInterval(t);res();} },100);
+  setTimeout(()=>{clearInterval(t);res();},3000);
+});
+
+async function fbRegister(email, pw, name){
+  if(!fbReady||!window._fb) return null;
+  const {auth,db,createUserWithEmailAndPassword,updateProfile,doc,setDoc,serverTimestamp}=window._fb;
+  try{
+    const c = await createUserWithEmailAndPassword(auth, email, pw);
+    await updateProfile(c.user, {displayName: name});
+    await setDoc(doc(db,'users',c.user.uid),{name, email, createdAt: serverTimestamp(), verified: true});
+    return c.user;
+  }catch(e){
+    if(e.code==='auth/email-already-in-use') return 'exists';
+    return null;
+  }
+}
+
+async function fbLogin(email, pw){
+  if(!fbReady||!window._fb) return null;
+  const {auth,signInWithEmailAndPassword}=window._fb;
+  try{
+    const c = await signInWithEmailAndPassword(auth, email, pw);
+    return c.user;
+  }catch(e){
+    if(e.code==='auth/wrong-password'||e.code==='auth/user-not-found'||e.code==='auth/invalid-credential') return 'wrong';
+    return null;
+  }
+}
+
+async function fbForgot(email){
+  if(!fbReady||!window._fb) return false;
+  try{ await window._fb.sendPasswordResetEmail(window._fb.auth, email); return true; }catch{ return false; }
+}
+
+// ── SESSION ──────────────────────────────────────────────
+function getSess(){ return JSON.parse(localStorage.getItem('max_session')||'null'); }
+function setSess(d){ localStorage.setItem('max_session', JSON.stringify(d)); }
+
+// ── AUTO-LOGIN: si ya hay sesión, ir directo al perfil ───
+window.addEventListener('load', async()=>{
+  await fbWait;
+  if(fbReady && window._fb){
+    window._fb.onAuthStateChanged(window._fb.auth, user=>{
+      if(user){
+        const s = { name: user.displayName || user.email.split('@')[0], email: user.email };
+        setSess(s);
+        window.location.href = 'max.profile.html';
+      }
+    });
+  }
+  const s = getSess();
+  if(s && s.email) window.location.href = 'max.profile.html';
+});
+
+// ── EMAILJS ──────────────────────────────────────────────
+emailjs.init('lMVSzez6IWLu6_nZP');
+const SVC = 'service_ub25r5r', TPL = 'template_evpb3ia';
+let vCode = '', vExpiry = null, resendT = null, pendingU = {};
+
+// ── REGISTER ─────────────────────────────────────────────
+async function handleRegister(){
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const pw    = document.getElementById('reg-pw').value;
+  const pw2   = document.getElementById('reg-pw2').value;
+  let ok = true;
+
+  const eok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  setErr('reg-email-err', !eok);         if(!eok) ok = false;
+  setErr('reg-pw-err', pw.length < 8);   if(pw.length < 8) ok = false;
+  setErr('reg-pw2-err', pw !== pw2);     if(pw !== pw2) ok = false;
+  if(!ok) return;
+
+  setBL('btn-reg','btn-reg-t','btn-reg-s', true);
+
+  await fbWait;
+  pendingU = { name: name || 'Usuario', email, pw };
+
+  vCode   = genCode();
+  vExpiry = Date.now() + 600000;
+
+  try {
+    await emailjs.send(SVC, TPL, {
+      to_name:           pendingU.name,
+      to_email:          email,
+      from_name:         'MAX',
+      reply_to:          email,
+      verification_code: vCode
+    });
+    document.getElementById('verify-em').textContent = email;
+    clearBoxes('c');
+    goTo('screen-verify');
+    setTimeout(()=> document.getElementById('c0').focus(), 400);
+    startResend();
+  } catch(e) {
+    showToast('No se pudo enviar el código. Revisa tu correo e intenta de nuevo.');
+  }
+
+  setBL('btn-reg','btn-reg-t','btn-reg-s', false);
+}
+
+// ── VERIFY ───────────────────────────────────────────────
+async function handleVerify(){
+  const entered = codeVal('c');
+  if(entered.length < 6){ showCE('code-err','Ingresa los 6 dígitos.'); return; }
+  if(Date.now() > vExpiry){ showCE('code-err','El código expiró. Reenvía uno nuevo.'); shakeB('c'); return; }
+  if(entered !== vCode){
+    showCE('code-err','Código incorrecto. Inténtalo de nuevo.');
+    shakeB('c');
+    clearBoxes('c');
+    setTimeout(()=> document.getElementById('c0').focus(), 100);
+    return;
+  }
+
+  setBL('btn-verify','btn-verify-t','btn-verify-s', true);
+
+  const fbU = await fbRegister(pendingU.email, pendingU.pw, pendingU.name);
+
+  if(fbU === 'exists'){
+    showCE('code-err','Este correo ya tiene una cuenta. Inicia sesión.');
+    setBL('btn-verify','btn-verify-t','btn-verify-s', false);
+    return;
+  }
+
+  if(fbU && fbU.uid){
+    const s = { name: pendingU.name, email: pendingU.email };
+    setSess(s);
+    document.getElementById('suc-msg').textContent = `Hola ${pendingU.name}, MAX está listo para ti 🚀`;
+    goTo('screen-success');
+    setTimeout(()=> window.location.href = 'max.profile.html', 2200);
+  } else {
+    showToast('Error al crear la cuenta. Intenta de nuevo.');
+  }
+
+  setBL('btn-verify','btn-verify-t','btn-verify-s', false);
+}
+
+async function resendCode(){
+  vCode   = genCode();
+  vExpiry = Date.now() + 600000;
+  clearBoxes('c');
+  document.getElementById('code-err').classList.remove('show');
+  try {
+    await emailjs.send(SVC, TPL, {
+      to_name:           pendingU.name,
+      to_email:          pendingU.email,
+      from_name:         'MAX',
+      reply_to:          pendingU.email,
+      verification_code: vCode
+    });
+    showToast('✅ Código reenviado. Revisa tu correo.', true);
+  } catch {
+    showToast('Error al reenviar el código.');
+  }
+  startResend();
+  setTimeout(()=> document.getElementById('c0').focus(), 100);
+}
+
+function startResend(){
+  const btn = document.getElementById('resend-btn');
+  let s = 30;
+  btn.disabled = true;
+  btn.textContent = `Reenviar en ${s}s`;
+  clearInterval(resendT);
+  resendT = setInterval(()=>{
+    s--;
+    if(s <= 0){ clearInterval(resendT); btn.disabled = false; btn.textContent = 'Reenviar código'; }
+    else btn.textContent = `Reenviar en ${s}s`;
+  }, 1000);
+}
+
+// ── LOGIN ─────────────────────────────────────────────────
+async function handleLogin(){
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pw    = document.getElementById('login-pw').value;
+  setErr('login-err', false);
+  if(!email || !pw){ setErr('login-err', true, 'Completa todos los campos'); return; }
+
+  setBL('btn-login','btn-login-t','btn-login-s', true);
+  await fbWait;
+
+  const fbU = await fbLogin(email, pw);
+  if(fbU && fbU.uid){
+    const s = { name: fbU.displayName || email.split('@')[0], email };
+    setSess(s);
+    setBL('btn-login','btn-login-t','btn-login-s', false);
+    window.location.href = 'max.profile.html';
+    return;
+  }
+  if(fbU === 'wrong'){
+    await delay(500);
+    setErr('login-err', true, 'Correo o contraseña incorrectos');
+  } else {
+    setErr('login-err', true, 'No encontramos esa cuenta');
+  }
+  setBL('btn-login','btn-login-t','btn-login-s', false);
+}
+
+// ── FORGOT ────────────────────────────────────────────────
+async function handleForgot(){
+  const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+  setErr('forgot-err', false);
+  if(!email){ setErr('forgot-err', true, 'Ingresa tu correo'); return; }
+
+  setBL('btn-forgot','btn-forgot-t','btn-forgot-s', true);
+  await fbWait;
+
+  const sent = await fbForgot(email);
+  if(sent){
+    showToast('✅ Enlace enviado. Revisa tu correo.', true);
+    goTo('screen-login');
+  } else {
+    setErr('forgot-err', true, 'No encontramos esa cuenta');
+  }
+  setBL('btn-forgot','btn-forgot-t','btn-forgot-s', false);
+}
+
+// ── CODE BOXES ────────────────────────────────────────────
+function setupBoxes(p, onDone){
+  for(let i = 0; i < 6; i++){
+    const box   = document.getElementById(p+i);
+    const boxes = Array.from({length:6}, (_,j)=> document.getElementById(p+j));
+    box.addEventListener('input', e=>{
+      const v = e.target.value.replace(/\D/g,'');
+      box.value = v ? v[0] : '';
+      box.classList.toggle('filled', !!box.value);
+      document.getElementById('code-err')?.classList.remove('show');
+      if(v && i < 5) boxes[i+1].focus();
+      if(boxes.map(b=>b.value).join('').length === 6) onDone();
+    });
+    box.addEventListener('keydown', e=>{
+      if(e.key === 'Backspace' && !box.value && i > 0){
+        boxes[i-1].focus(); boxes[i-1].value = ''; boxes[i-1].classList.remove('filled');
+      }
+    });
+    box.addEventListener('paste', e=>{
+      e.preventDefault();
+      const pasted = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+      [...pasted].forEach((ch,j)=>{ if(boxes[j]){ boxes[j].value=ch; boxes[j].classList.add('filled'); }});
+      if(pasted.length === 6) onDone();
+      else if(boxes[pasted.length]) boxes[pasted.length].focus();
+    });
+  }
+}
+setupBoxes('c', handleVerify);
+
+function codeVal(p){ return Array.from({length:6}, (_,i)=> document.getElementById(p+i).value).join(''); }
+function clearBoxes(p){ for(let i=0;i<6;i++){ const b=document.getElementById(p+i); if(b){b.value='';b.classList.remove('filled','shk');} } }
+function shakeB(p){ for(let i=0;i<6;i++){ const b=document.getElementById(p+i); if(!b)continue; b.classList.remove('shk'); void b.offsetWidth; b.classList.add('shk'); } }
+
+// ── PW STRENGTH ───────────────────────────────────────────
+function checkStr(pw,b0,b1,b2,lbl){
+  let s=0;
+  if(pw.length>=8) s++;
+  if(/[A-Z]/.test(pw)||/[0-9]/.test(pw)) s++;
+  if(/[^A-Za-z0-9]/.test(pw)||pw.length>=12) s++;
+  const cls=['','weak','med','strong'], labels=['','Débil','Media','Fuerte'], colors=['','#ff4466','#ffaa33','#33dd88'];
+  [b0,b1,b2].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.className='bar'+(i<s?' '+cls[s]:''); });
+  const el=document.getElementById(lbl); if(el){ el.textContent=pw?labels[s]:''; el.style.color=colors[s]; }
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function genCode(){ return Math.floor(100000 + Math.random()*900000).toString(); }
+function delay(ms){ return new Promise(r=> setTimeout(r, ms)); }
+function setErr(id, show, msg){ const el=document.getElementById(id); if(!el)return; if(msg) el.textContent=msg; el.classList.toggle('show', !!show); }
+function showCE(id, msg){ const el=document.getElementById(id); if(!el)return; el.textContent=msg; el.classList.add('show'); }
+function showToast(msg, ok=false){
+  const t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(ok?' ok':'');
+  t.classList.add('show'); setTimeout(()=> t.classList.remove('show'), 3500);
+}
+function setBL(bid,tid,sid,on){
+  document.getElementById(bid).disabled=on;
+  document.getElementById(tid).style.display=on?'none':'inline';
+  document.getElementById(sid).classList.toggle('show',on);
+}
+function toggleEye(id,btn){
+  const inp=document.getElementById(id); const show=inp.type==='text';
+  inp.type=show?'password':'text'; btn.textContent=show?'👁':'🙈';
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key !== 'Enter') return;
+  if(!document.getElementById('screen-register-full').classList.contains('hidden')) handleRegister();
+  if(!document.getElementById('screen-verify').classList.contains('hidden')) handleVerify();
+  if(!document.getElementById('screen-login').classList.contains('hidden')) handleLogin();
+  if(!document.getElementById('screen-forgot').classList.contains('hidden')) handleForgot();
+});
+
+</script>
+
+</body>
+</html>
