@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>M.A.X</title>
- 
+
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
   import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
- 
+
   const firebaseConfig = {
     apiKey:            "AIzaSyDB5CVtV4DxCNQ2OTydJJg_sovWULwkcE0",
     authDomain:        "max-ai-e9525.firebaseapp.com",
@@ -18,7 +18,7 @@
     messagingSenderId: "837918065362",
     appId:             "1:837918065362:web:d89b4f77b325d5d747a30b"
   };
- 
+
   try {
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -27,9 +27,8 @@
     window._fb = null;
   }
 </script>
- 
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
- 
 <style>
 :root {
   --bg:       #00010f;
@@ -45,9 +44,9 @@
   --max-bg:   rgba(255,255,255,.06);
   --radius:   18px;
 }
- 
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
 html, body {
   width: 100%; height: 100%;
   background: var(--bg);
@@ -55,7 +54,7 @@ html, body {
   font-family: 'Outfit', sans-serif;
   overflow: hidden;
 }
- 
+
 /* ── BACKGROUND ── */
 .bg {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -71,13 +70,13 @@ html, body {
   0%,100% { opacity:.7; transform: translateX(-50%) scale(1); }
   50%      { opacity:1;  transform: translateX(-50%) scale(1.2); }
 }
- 
+
 /* ── LAYOUT ── */
 #app {
   position: fixed; inset: 0; z-index: 1;
   display: flex; flex-direction: column;
 }
- 
+
 /* ── HEADER ── */
 .hdr {
   display: flex; align-items: center; justify-content: space-between;
@@ -87,9 +86,9 @@ html, body {
   backdrop-filter: blur(16px);
   flex-shrink: 0;
 }
- 
+
 .hdr-left { display: flex; align-items: center; gap: 12px; }
- 
+
 .orb-sm {
   width: 38px; height: 38px; border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, rgba(77,127,255,.5), rgba(42,95,255,.15));
@@ -104,16 +103,16 @@ html, body {
   0%,100% { box-shadow: 0 0 20px rgba(42,95,255,.3); }
   50%      { box-shadow: 0 0 40px rgba(42,95,255,.55); }
 }
- 
+
 .hdr-title { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; letter-spacing: 2px; }
 .hdr-sub   { font-size: 11px; color: var(--muted); margin-top: 1px; }
- 
+
 .ia-badge {
   font-size: 11px; padding: 3px 10px; border-radius: 20px;
   background: rgba(42,95,255,.2); border: 1px solid var(--border);
   color: var(--blue-l); font-weight: 500; transition: all .3s;
 }
- 
+
 .avatar-btn {
   width: 38px; height: 38px; border-radius: 50%;
   background: linear-gradient(135deg, var(--blue), #8855ff);
@@ -122,7 +121,7 @@ html, body {
   box-shadow: 0 4px 16px rgba(42,95,255,.4); transition: transform .2s;
 }
 .avatar-btn:hover { transform: scale(1.08); }
- 
+
 /* ── CHAT AREA ── */
 #chat {
   flex: 1; overflow-y: auto; overflow-x: hidden;
@@ -130,11 +129,11 @@ html, body {
   display: flex; flex-direction: column; gap: 16px;
   scroll-behavior: smooth;
 }
- 
+
 #chat::-webkit-scrollbar { width: 4px; }
 #chat::-webkit-scrollbar-track { background: transparent; }
 #chat::-webkit-scrollbar-thumb { background: rgba(77,127,255,.3); border-radius: 4px; }
- 
+
 /* ── EMPTY STATE ── */
 .empty-state {
   flex: 1; display: flex; flex-direction: column;
@@ -150,7 +149,7 @@ html, body {
   color: var(--off);
 }
 .empty-txt { font-size: 14px; color: var(--muted); text-align: center; }
- 
+
 /* ── MENSAJES ── */
 .msg-row {
   display: flex; gap: 10px; animation: slideUp .3s ease both;
@@ -160,10 +159,10 @@ html, body {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
- 
+
 .msg-row.user  { flex-direction: row-reverse; }
 .msg-row.max   { flex-direction: row; }
- 
+
 .msg-avatar {
   width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
@@ -179,39 +178,39 @@ html, body {
   font-family: 'Orbitron', sans-serif; font-size: 8px; letter-spacing: 1px;
   box-shadow: 0 0 12px rgba(42,95,255,.3);
 }
- 
+
 .msg-content { max-width: calc(100% - 52px); display: flex; flex-direction: column; gap: 4px; }
- 
+
 .msg-row.user  .msg-content { align-items: flex-end; }
 .msg-row.max   .msg-content { align-items: flex-start; }
- 
+
 .msg-name { font-size: 11px; color: var(--muted); font-weight: 500; padding: 0 6px; }
- 
+
 .msg-bubble {
   padding: 12px 16px; border-radius: var(--radius);
   font-size: 15px; line-height: 1.6; font-weight: 400;
   word-break: break-word; white-space: pre-wrap;
 }
- 
+
 .msg-row.user .msg-bubble {
   background: var(--user-bg);
   border: 1px solid rgba(42,95,255,.35);
   border-bottom-right-radius: 4px;
   color: #fff;
 }
- 
+
 .msg-row.max .msg-bubble {
   background: var(--max-bg);
   border: 1px solid var(--border);
   border-bottom-left-radius: 4px;
   color: var(--off);
 }
- 
+
 .msg-meta {
   font-size: 10px; color: var(--muted); padding: 0 6px;
   display: flex; align-items: center; gap: 6px;
 }
- 
+
 /* ── TYPING INDICATOR ── */
 .typing-bubble {
   background: var(--max-bg); border: 1px solid var(--border);
@@ -229,7 +228,7 @@ html, body {
   0%,80%,100% { opacity: .2; transform: scale(.8); }
   40%         { opacity: 1;  transform: scale(1.1); }
 }
- 
+
 /* ── INPUT AREA ── */
 .input-area {
   padding: 12px 16px 20px;
@@ -238,7 +237,7 @@ html, body {
   backdrop-filter: blur(16px);
   flex-shrink: 0;
 }
- 
+
 .input-wrap {
   display: flex; align-items: flex-end; gap: 10px;
   background: rgba(10,26,110,.4);
@@ -250,7 +249,7 @@ html, body {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(42,95,255,.12);
 }
- 
+
 #msg-input {
   flex: 1; background: transparent; border: none; outline: none;
   color: #fff; font-family: 'Outfit', sans-serif; font-size: 15px;
@@ -258,7 +257,7 @@ html, body {
   line-height: 1.5; padding: 2px 0;
 }
 #msg-input::placeholder { color: rgba(102,136,187,.5); }
- 
+
 .send-btn {
   width: 36px; height: 36px; border-radius: 10px;
   background: var(--blue); border: none; cursor: pointer;
@@ -269,12 +268,12 @@ html, body {
 .send-btn:hover  { background: var(--blue-l); transform: scale(1.05); }
 .send-btn:active { transform: scale(.95); }
 .send-btn:disabled { background: rgba(42,95,255,.3); cursor: not-allowed; transform: none; }
- 
+
 .input-hint {
   text-align: center; font-size: 11px; color: var(--muted);
   margin-top: 8px;
 }
- 
+
 /* ── MENÚ USUARIO ── */
 .umenu {
   position: fixed; top: 68px; right: 16px;
@@ -294,7 +293,7 @@ html, body {
 .umi.danger { color: var(--err); }
 .um-sep { height: 1px; background: rgba(255,255,255,.08); margin: 4px 0; }
 .um-name { padding: 10px 14px 6px; font-size: 12px; color: var(--muted); }
- 
+
 /* ── MODAL RECORDATORIOS ── */
 .reminder-modal {
   position: fixed; inset: 0;
@@ -330,7 +329,7 @@ html, body {
   padding: 10px 14px; border: none; border-radius: 10px;
   background: #ff4466; color: #fff; cursor: pointer; font-size: 13px;
 }
- 
+
 /* ── TOAST ── */
 .toast {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -340,9 +339,9 @@ html, body {
 }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .toast.ok   { background: rgba(26,122,74,.9); }
- 
+
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
- 
+
 /* ── BOTÓN VOZ ESTILO CHATGPT ── */
 #voice-btn {
   width: 42px; height: 42px; border-radius: 50%;
@@ -359,7 +358,7 @@ html, body {
   border-color: rgba(77,127,255,.8);
   box-shadow: 0 0 20px rgba(42,95,255,.5);
 }
- 
+
 .vbars {
   display: flex; align-items: center; gap: 3px; height: 20px;
 }
@@ -369,19 +368,21 @@ html, body {
   height: 6px;
   transition: height .2s;
 }
- 
+
+/* Animación cuando está activo */
 #voice-btn.activo .vbars span:nth-child(1) { animation: bar 1s ease-in-out infinite 0s; }
 #voice-btn.activo .vbars span:nth-child(2) { animation: bar 1s ease-in-out infinite .15s; }
 #voice-btn.activo .vbars span:nth-child(3) { animation: bar 1s ease-in-out infinite .3s; }
 #voice-btn.activo .vbars span:nth-child(4) { animation: bar 1s ease-in-out infinite .15s; }
 #voice-btn.activo .vbars span:nth-child(5) { animation: bar 1s ease-in-out infinite 0s; }
- 
+
+/* Cuando MAX está hablando — barras más intensas */
 #voice-btn.hablando .vbars span:nth-child(1) { animation: barBig 0.6s ease-in-out infinite 0s; }
 #voice-btn.hablando .vbars span:nth-child(2) { animation: barBig 0.6s ease-in-out infinite .1s; }
 #voice-btn.hablando .vbars span:nth-child(3) { animation: barBig 0.6s ease-in-out infinite .2s; }
 #voice-btn.hablando .vbars span:nth-child(4) { animation: barBig 0.6s ease-in-out infinite .1s; }
 #voice-btn.hablando .vbars span:nth-child(5) { animation: barBig 0.6s ease-in-out infinite 0s; }
- 
+
 @keyframes bar {
   0%,100% { height: 4px; }
   50%      { height: 16px; }
@@ -391,15 +392,16 @@ html, body {
   50%      { height: 20px; }
 }
 </style>
+
 </head>
 <body>
- 
+
 <div class="bg"></div>
 <div class="toast" id="toast"></div>
- 
+
 <!-- ══ APP ══ -->
 <div id="app">
- 
+
   <!-- HEADER -->
   <div class="hdr">
     <div class="hdr-left">
@@ -409,15 +411,15 @@ html, body {
         <div class="hdr-sub">Asistente Inteligente</div>
       </div>
     </div>
- 
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="ia-badge" id="ia-badge">⚡ Listo</div>
-      <button class="avatar-btn" id="avatar-btn" onclick="toggleUMenu()">
-        <span id="av-letter">U</span>
-      </button>
-    </div>
-  </div>
- 
+
+<div style="display:flex;align-items:center;gap:10px;">
+  <div class="ia-badge" id="ia-badge">⚡ Listo</div>
+  <button class="avatar-btn" id="avatar-btn" onclick="toggleUMenu()">
+    <span id="av-letter">U</span>
+  </button>
+</div>
+</div>
+
   <!-- CHAT -->
   <div id="chat">
     <div class="empty-state" id="empty-state">
@@ -425,26 +427,26 @@ html, body {
       <div class="empty-txt">Hola, <span id="home-name">Usuario</span> 👋<br>Escríbeme algo para comenzar.</div>
     </div>
   </div>
- 
+
   <!-- INPUT -->
   <div class="input-wrap">
-    <textarea
-      id="msg-input"
-      placeholder="Escríbeme algo…"
-      rows="1"
-      oninput="autoResize(this)"
-      onkeydown="handleKey(event)"
-    ></textarea>
-    <button id="voice-btn" onclick="toggleModoLlamada()" title="Modo voz">
-      <span class="vbars" id="vbars">
-        <span></span><span></span><span></span><span></span><span></span>
-      </span>
-    </button>
-    <button class="send-btn" id="send-btn" onclick="handleSend()">➤</button>
-  </div>
- 
+  <textarea
+    id="msg-input"
+    placeholder="Escríbeme algo…"
+    rows="1"
+    onInput="autoResize(this)"
+    onKeydown="handleKey(event)"
+  ></textarea>
+  <button id="voice-btn" onclick="toggleModoLlamada()" title="Modo voz">
+    <span class="vbars" id="vbars">
+      <span></span><span></span><span></span><span></span><span></span>
+    </span>
+  </button>
+  <button class="send-btn" id="send-btn" onclick="handleSend()">➤</button>
 </div>
- 
+
+</div>
+
 <!-- ══ MENÚ USUARIO ══ -->
 <div class="umenu" id="umenu">
   <div class="um-name" id="um-name">Mi cuenta</div>
@@ -457,7 +459,7 @@ html, body {
   <div class="um-sep"></div>
   <div class="umi danger" onclick="handleLogout()">🚪 Cerrar sesión</div>
 </div>
- 
+
 <!-- ══ MODAL RECORDATORIOS ══ -->
 <div class="reminder-modal" id="reminderModal">
   <div class="reminder-box">
@@ -470,21 +472,21 @@ html, body {
     <div id="reminderList"></div>
   </div>
 </div>
- 
+
 <!-- ══ SCRIPTS ══ -->
- 
+
 <!-- RECORDATORIOS -->
 <script>
   function handleReminders(){ document.getElementById("reminderModal").style.display="flex"; loadReminders(); }
   function closeReminders()  { document.getElementById("reminderModal").style.display="none"; }
- 
+
   function saveReminder(){
     const input=document.getElementById("newReminder"); const text=input.value.trim();
     if(!text) return;
     let r=JSON.parse(localStorage.getItem("max_reminders")||"[]"); r.push(text);
     localStorage.setItem("max_reminders",JSON.stringify(r)); input.value=""; loadReminders();
   }
- 
+
   function loadReminders(){
     const list=document.getElementById("reminderList");
     let r=JSON.parse(localStorage.getItem("max_reminders")||"[]");
@@ -494,32 +496,32 @@ html, body {
         <button onclick="deleteReminder(${i})">Eliminar</button>
       </div>`).join("");
   }
- 
+
   function updateReminder(i,v){
     let r=JSON.parse(localStorage.getItem("max_reminders")||"[]"); r[i]=v.trim();
     localStorage.setItem("max_reminders",JSON.stringify(r));
   }
- 
+
   function deleteReminder(i){
     let r=JSON.parse(localStorage.getItem("max_reminders")||"[]"); r.splice(i,1);
     localStorage.setItem("max_reminders",JSON.stringify(r)); loadReminders();
   }
- 
+
   function handleConnectMax(){ showToast("Conectando con MAX...",true); setTimeout(()=>window.location.href="max-connect.html",800); }
   function handleConnectHome(){ showToast("Conectando con Casa...",true); setTimeout(()=>window.location.href="casa-connect.html",800); }
 </script>
- 
+
 <!-- SESIÓN / UI -->
 <script>
   function getSess(){ return JSON.parse(localStorage.getItem('max_session')||'null'); }
   function clearSess(){ localStorage.removeItem('max_session'); }
- 
+
   let fbReady=false;
   const fbWait=new Promise(res=>{
     const t=setInterval(()=>{ if(window._fb){fbReady=true;clearInterval(t);res();} },100);
     setTimeout(()=>{clearInterval(t);res();},3000);
   });
- 
+
   window.addEventListener('load', async ()=>{
     await fbWait;
     if(fbReady && window._fb){
@@ -531,7 +533,7 @@ html, body {
       const s=getSess(); if(!s||!s.email){window.location.href='index.html';return;} loadProfile(s);
     }
   });
- 
+
   let userName = 'Usuario';
   function loadProfile(s){
     userName = s.name || 'Usuario';
@@ -539,57 +541,59 @@ html, body {
     document.getElementById('av-letter').textContent  = userName[0].toUpperCase();
     document.getElementById('um-name').textContent    = userName;
   }
- 
+
   async function handleLogout(){
     await fbWait;
     if(fbReady && window._fb){ try{await window._fb.signOut(window._fb.auth);}catch{} }
     clearSess(); window.location.href='index.html';
   }
- 
+
   function toggleUMenu(){ document.getElementById('umenu').classList.toggle('open'); }
   function closeUMenu() { document.getElementById('umenu').classList.remove('open'); }
   document.addEventListener('click', e=>{
     if(!e.target.closest('#umenu') && !e.target.closest('#avatar-btn')) closeUMenu();
   });
- 
+
   function showToast(msg, ok=false){
     const t=document.getElementById('toast'); t.textContent=msg;
     t.className='toast'+(ok?' ok':'');
     t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
   }
- 
+
+  // Auto-resize textarea
   function autoResize(el){
     el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,140)+'px';
   }
- 
+
   function handleKey(e){
     if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); handleSend(); }
   }
- 
+
   // ── CHAT UI ──
   let messageCount = 0;
- 
+
   function removeEmptyState(){
     const es = document.getElementById('empty-state');
     if(es) es.remove();
   }
- 
+
   function appendMessage(role, text, ia=''){
     removeEmptyState();
     messageCount++;
     const chat = document.getElementById('chat');
- 
+
     const isUser = role === 'user';
     const avatarText = isUser ? (userName[0]||'U').toUpperCase() : 'MAX';
     const displayName = isUser ? userName : 'M.A.X';
- 
+
+    // Badge IA
     let metaHtml = '';
     if(!isUser && ia){
       const labels = {gemini:'✨ Gemini', groq:'⚡ Groq', cohere:'🌐 Cohere', offline:'💾 Offline', live:'🔵 Live'};
       const label = labels[ia] || ia;
       metaHtml = `<span>${label}</span>`;
     }
- 
+
     const row = document.createElement('div');
     row.className = `msg-row ${isUser ? 'user' : 'max'}`;
     row.innerHTML = `
@@ -599,12 +603,12 @@ html, body {
         <div class="msg-bubble">${escapeHtml(text)}</div>
         ${metaHtml ? `<div class="msg-meta">${metaHtml}</div>` : ''}
       </div>`;
- 
+
     chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
     return row;
   }
- 
+
   function showTyping(){
     removeEmptyState();
     const chat = document.getElementById('chat');
@@ -621,12 +625,12 @@ html, body {
     chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
   }
- 
+
   function removeTyping(){
     const t = document.getElementById('typing-row');
     if(t) t.remove();
   }
- 
+
   function clearChat(){
     closeUMenu();
     const chat = document.getElementById('chat');
@@ -638,95 +642,93 @@ html, body {
     AI_ROUTER.historial = [];
     messageCount = 0;
   }
- 
+
   function setIaBadge(ia){
     const badge = document.getElementById('ia-badge');
     const labels = {gemini:'✨ Gemini', groq:'⚡ Groq', cohere:'🌐 Cohere', offline:'💾 Offline'};
     badge.textContent = labels[ia] || ('⚡ '+ia);
   }
- 
+
   function escapeHtml(t){
     return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
- 
+
   // ── SEND ──
   async function handleSend(){
     const input = document.getElementById('msg-input');
     const btn   = document.getElementById('send-btn');
     const v = input.value.trim();
     if(!v) return;
- 
+
     input.value = ''; input.style.height = 'auto';
     btn.disabled = true;
- 
+
     appendMessage('user', v);
     showTyping();
- 
-    // ── FIX 1: Marcar como "enviando" para bloquear el reinicio del mic
-    // mientras esperamos la respuesta de la IA
-    enviando = true;
-    pararMic();
- 
+
     await AI_ROUTER.enviar(v,
       (respuesta, ia) => {
         removeTyping();
+        // Quitar prefijo "🔵 Modo Live: " o "🟢 Modo Offline: " si existe
         const clean = respuesta.replace(/^(🔵 Modo Live:|🟢 Modo Offline:)\s*/,'');
         appendMessage('max', clean, ia);
         setIaBadge(ia);
-        enviando = false;  // liberar bandera antes de hablar
         hablarSalome(clean);
         btn.disabled = false;
       },
       (error) => {
         removeTyping();
         appendMessage('max', '❌ '+error, '');
-        enviando = false;
         btn.disabled = false;
-        // Si hubo error y estamos en modo llamada, reiniciar mic
-        if (modoLlamada && !maxHablando) setTimeout(() => iniciarMic(), 500);
       }
     );
   }
 </script>
- 
+
 <!-- AI ROUTER -->
 <script>
+  // ── GESTIÓN DE RECORDATORIOS ──────────────────────────────
   function getReminders(){ return JSON.parse(localStorage.getItem("max_reminders")||"[]"); }
   function saveReminders(r){ localStorage.setItem("max_reminders", JSON.stringify(r)); }
- 
+
   function agregarRecordatorio(texto){
     const r = getReminders();
     r.push(texto);
     saveReminders(r);
   }
- 
+
+  // Detecta si el mensaje quiere guardar algo (cita, recordatorio, evento)
   function quiereGuardar(texto){
     const t = texto.toLowerCase();
     return /(tengo|agenda|agéndame|guarda|añade|crea|pon|recuérdame|recuerdame|tengo cita|tengo reunión|tengo clase|tengo evento|para el|el día|el próximo|este \d+)/.test(t);
   }
- 
+
+  // Extrae el texto útil del recordatorio desde el mensaje del usuario
   function extraerRecordatorio(texto){
+    // Limpia frases introductorias y deja el evento
     return texto
       .replace(/^(agéndame|agendame|guarda|añade|crea|pon un recordatorio de|recuérdame|recuerdame|tengo que recordar que|por favor)\s*/i,'')
       .trim();
   }
- 
+
+  // ── AI ROUTER ─────────────────────────────────────────────
   const AI_ROUTER = {
     WORKER_URL: "https://maxiarouter.pabloandresperlaza16.workers.dev",
     historial: [],
- 
+
+    // Sistema prompt con instrucciones especiales para recordatorios
     getSistemaPrompt(){
       const reminders = getReminders();
       const listaRecordatorios = reminders.length
         ? reminders.map((r,i)=>`${i+1}. ${r}`).join("\n")
         : "No hay recordatorios guardados.";
- 
+
       return `Eres MAX, un asistente inteligente y amigable. Responde siempre en español de forma clara y concisa.
- 
+
 INFORMACIÓN DEL USUARIO:
 - Recordatorios actuales:
 ${listaRecordatorios}
- 
+
 INSTRUCCIONES ESPECIALES:
 - Si el usuario pregunta por sus recordatorios, citas o eventos, usa la lista de arriba para responder.
 - Si el usuario menciona que tiene una cita, evento, reunión, clase u otra actividad que debe recordar, responde confirmando que lo guardarás y agrega al final de tu respuesta exactamente esta línea:
@@ -734,12 +736,14 @@ INSTRUCCIONES ESPECIALES:
 - El texto del recordatorio debe ser claro y conciso, por ejemplo: "Cita médica el 18 de mayo"
 - Solo agrega [GUARDAR_RECORDATORIO:...] cuando el usuario explícitamente quiera guardar algo.`;
     },
- 
+
     isMath(texto){
       return /^[\d\s\+\-\*\/\.\(\)]+$/.test(texto.trim());
     },
- 
+
     async enviar(mensajeUsuario, onSuccess, onError){
+
+      // Matemáticas simples → offline
       if(this.isMath(mensajeUsuario)){
         try{
           const r = Function("return "+mensajeUsuario)();
@@ -749,37 +753,39 @@ INSTRUCCIONES ESPECIALES:
         }
         return;
       }
- 
+
       this.historial.push({role:"user", content:mensajeUsuario});
- 
+
       try{
         const response = await fetch(this.WORKER_URL, {
           method: "POST",
           headers: {"Content-Type":"application/json"},
           body: JSON.stringify({
             mensajes: this.historial,
-            sistemaPrompt: this.getSistemaPrompt()
+            sistemaPrompt: this.getSistemaPrompt()  // ← siempre actualizado con recordatorios
           })
         });
- 
+
         const data = await response.json();
         if(data.error) throw new Error(data.error);
- 
+
         let respuesta = data.respuesta;
- 
+
+        // ── Detectar si MAX quiere guardar un recordatorio ──
         const matchGuardar = respuesta.match(/\[GUARDAR_RECORDATORIO:\s*(.+?)\]/i);
         if(matchGuardar){
           const textoRecordatorio = matchGuardar[1].trim();
           agregarRecordatorio(textoRecordatorio);
+          // Quitar la etiqueta de la respuesta visible
           respuesta = respuesta.replace(/\[GUARDAR_RECORDATORIO:.*?\]/i, '').trim();
           respuesta += `\n\n✅ Guardé en tus recordatorios: *${textoRecordatorio}*`;
         }
- 
+
         this.historial.push({role:"assistant", content:data.respuesta});
         if(this.historial.length > 40) this.historial = this.historial.slice(-40);
- 
+
         onSuccess(respuesta, data.ia || "live");
- 
+
       }catch(err){
         console.error("ERROR REAL:", err);
         this.historial.pop();
@@ -788,113 +794,83 @@ INSTRUCCIONES ESPECIALES:
     }
   };
 </script>
- 
-<!-- ══ VOZ SALOME ══ -->
+<!-- ══ VOZ MAX (Puter.js) ══ -->
 <script>
-  let vozSalome     = null;
-  let modoLlamada   = false;
-  let recognition   = null;
-  let maxHablando   = false;
+  let modoLlamada = false;
+  let recognition = null;
+  let maxHablando = false;
   let wakeRecognition = null;
-  let enviando      = false;  // ── FIX 1: bandera para evitar race condition
- 
-  // ── FIX 2: Unlock de audio para móviles ──────────────────
-  // Los navegadores móviles bloquean speechSynthesis a menos que
-  // se haya "desbloqueado" desde un evento de usuario directo (tap/click).
-  let audioUnlocked = false;
- 
-  function unlockAudio() {
-    if (audioUnlocked) return;
-    // Hablar un utterance vacío/silencioso desde el tap del usuario
-    const utt = new SpeechSynthesisUtterance('');
-    utt.volume = 0;
-    speechSynthesis.speak(utt);
-    audioUnlocked = true;
-  }
- 
-  // El botón de voz ya es un tap directo del usuario → ideal para unlock
-  document.getElementById('voice-btn').addEventListener('click', unlockAudio, { once: false });
- 
-  // ── VOZ ──────────────────────────────────────────────────
-  function cargarVozSalome() {
-    const voices = speechSynthesis.getVoices();
-    vozSalome =
-      voices.find(v => v.name === 'Microsoft Salome Online (Natural) - Spanish (Colombia)') ||
-      voices.find(v => v.name === 'Google español de Estados Unidos') ||
-      voices.find(v => v.name === 'Google español') ||
-      voices.find(v => v.lang === 'es-CO') ||
-      voices.find(v => v.lang === 'es-US') ||
-      voices.find(v => v.lang.startsWith('es'));
-  }
-  speechSynthesis.onvoiceschanged = cargarVozSalome;
-  cargarVozSalome();
-  setTimeout(cargarVozSalome, 500);
-  setTimeout(cargarVozSalome, 1500);
- 
-  // ── HABLAR ───────────────────────────────────────────────
-  function hablarSalome(texto) {
+  let currentAudio = null;
+
+  // ── HABLAR con salome ───────────────────────────────────
+  async function hablarSalome(texto) {
     if (!modoLlamada) return;
- 
-    speechSynthesis.cancel();
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     pararMic();
     maxHablando = true;
     setBtnHablando(true);
- 
-    if (!vozSalome) cargarVozSalome();
- 
+
+    try {
+      const res = await fetch("https://maxiarouter.pabloandresperlaza16.workers.dev", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "tts", texto, voz: "es-CO-SalomeNeural" })
+      });
+      if (!res.ok) throw new Error("Error TTS");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      currentAudio = new Audio(url);
+      currentAudio.onended = () => {
+        URL.revokeObjectURL(url);
+        currentAudio = null;
+        maxHablando = false;
+        setBtnHablando(false);
+        if (modoLlamada) setTimeout(() => iniciarMic(), 600);
+      };
+      currentAudio.onerror = () => {
+        currentAudio = null;
+        onVozTerminada();
+      };
+      currentAudio.play();
+    } catch(e) {
+      console.warn("Edge TTS error:", e);
+      fallbackVoz(texto);
+    }
+  }
+
+  // ── FALLBACK Web Speech (por si Puter falla) ──────────────
+  function fallbackVoz(texto) {
+    const synth = window.speechSynthesis;
+    if (!synth) { onVozTerminada(); return; }
+    synth.cancel();
     const utt = new SpeechSynthesisUtterance(texto);
-    if (vozSalome) utt.voice = vozSalome;
     utt.lang  = 'es-CO';
     utt.rate  = 1.0;
     utt.pitch = 1.0;
-    utt.volume = 1.0;
- 
-    utt.onstart = () => {
-      maxHablando = true;
-      setBtnHablando(true);
-    };
- 
-    utt.onend = () => {
-      maxHablando = false;
-      setBtnHablando(false);
-      // ── FIX 1: Solo reiniciar mic si NO estamos enviando/procesando
-      if (modoLlamada && !enviando) {
-        setTimeout(() => iniciarMic(), 600);
-      }
-    };
- 
-    utt.onerror = (e) => {
-      // Ignorar errores de "interrupted" que son normales al cancelar
-      if (e.error === 'interrupted' || e.error === 'canceled') return;
-      maxHablando = false;
-      setBtnHablando(false);
-      if (modoLlamada && !enviando) setTimeout(() => iniciarMic(), 600);
-    };
- 
-    // ── FIX 2: En iOS/Android speechSynthesis a veces se congela.
-    // Workaround: si después de 500ms no arrancó, forzar resume.
-    setTimeout(() => {
-      if (speechSynthesis.paused) speechSynthesis.resume();
-    }, 500);
- 
-    speechSynthesis.speak(utt);
+    utt.onend = onVozTerminada;
+    utt.onerror = onVozTerminada;
+    synth.speak(utt);
   }
- 
+
+  function onVozTerminada() {
+    maxHablando = false;
+    setBtnHablando(false);
+    if (modoLlamada) setTimeout(() => iniciarMic(), 600);
+  }
+
   // ── MIC USUARIO ──────────────────────────────────────────
   function iniciarMic() {
-    // ── FIX 1: No iniciar mic si estamos procesando respuesta o MAX habla
-    if (!modoLlamada || maxHablando || recognition || enviando) return;
- 
+    if (!modoLlamada || maxHablando || recognition) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
- 
+
     recognition = new SR();
     recognition.lang = 'es-CO';
     recognition.continuous = false;
     recognition.interimResults = true;
- 
+
     recognition.onresult = (e) => {
-      if (maxHablando || enviando) return;
+      if (maxHablando) return;
       let interino = '', final = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript;
@@ -903,52 +879,38 @@ INSTRUCCIONES ESPECIALES:
       const input = document.getElementById('msg-input');
       input.value = final || interino;
       autoResize(input);
- 
       if (final.trim()) {
         input.value = final.trim();
         pararMic();
-        // ── FIX 1: Un pequeño delay para que pararMic() limpie recognition antes de enviar
         setTimeout(() => handleSend(), 300);
       }
     };
- 
+
     recognition.onerror = (e) => {
-      recognition = null;
       if (e.error === 'no-speech' || e.error === 'aborted') {
-        if (modoLlamada && !maxHablando && !enviando) {
-          setTimeout(() => iniciarMic(), 400);
-        }
+        recognition = null;
+        if (modoLlamada && !maxHablando) setTimeout(() => iniciarMic(), 400);
         return;
       }
-      if (e.error === 'not-allowed') {
-        showToast('Sin permiso de micrófono');
-        detenerLlamada();
-        return;
-      }
-      // Otros errores: reintentar silenciosamente
-      if (modoLlamada && !maxHablando && !enviando) {
-        setTimeout(() => iniciarMic(), 600);
-      }
+      showToast('Error mic: ' + e.error);
+      detenerLlamada();
     };
- 
+
     recognition.onend = () => {
       recognition = null;
-      // ── FIX 1: Solo reiniciar si no estamos enviando ni MAX está hablando
-      if (modoLlamada && !maxHablando && !enviando) {
-        setTimeout(() => iniciarMic(), 400);
-      }
+      if (modoLlamada && !maxHablando) setTimeout(() => iniciarMic(), 400);
     };
- 
+
     try { recognition.start(); } catch(e) { recognition = null; }
   }
- 
+
   function pararMic() {
     if (recognition) {
       try { recognition.abort(); } catch(e) {}
       recognition = null;
     }
   }
- 
+
   // ── BOTÓN VOZ ────────────────────────────────────────────
   function setBtnHablando(v) {
     const btn = document.getElementById('voice-btn');
@@ -956,12 +918,11 @@ INSTRUCCIONES ESPECIALES:
     btn.classList.toggle('hablando', v);
     btn.classList.toggle('activo',  !v && modoLlamada);
   }
- 
+
   function toggleModoLlamada() {
     if (!modoLlamada) {
       modoLlamada = true;
       maxHablando = false;
-      enviando    = false;
       detenerWakeWord();
       document.getElementById('voice-btn').classList.add('activo');
       showToast('🎙️ Modo voz activado', true);
@@ -970,30 +931,30 @@ INSTRUCCIONES ESPECIALES:
       detenerLlamada();
     }
   }
- 
+
   function detenerLlamada() {
     pararMic();
-    speechSynthesis.cancel();
-    modoLlamada = false;
-    maxHablando = false;
-    enviando    = false;
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    window.speechSynthesis?.cancel();
+    modoLlamada  = false;
+    maxHablando  = false;
     const btn = document.getElementById('voice-btn');
     if (btn) btn.classList.remove('activo', 'hablando');
     showToast('Modo voz desactivado');
     setTimeout(() => iniciarWakeWord(), 1200);
   }
- 
+
   // ── WAKE WORD ────────────────────────────────────────────
   function iniciarWakeWord() {
     if (modoLlamada || wakeRecognition) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
- 
+
     wakeRecognition = new SR();
     wakeRecognition.lang = 'es-CO';
     wakeRecognition.continuous = false;
     wakeRecognition.interimResults = false;
- 
+
     wakeRecognition.onresult = (e) => {
       const texto = e.results[0][0].transcript.toLowerCase().trim();
       if (texto.includes('max') || texto.includes('hola max')) {
@@ -1003,29 +964,29 @@ INSTRUCCIONES ESPECIALES:
         }
       }
     };
- 
+
     wakeRecognition.onend = () => {
       wakeRecognition = null;
       if (!modoLlamada) setTimeout(() => iniciarWakeWord(), 400);
     };
- 
+
     wakeRecognition.onerror = (e) => {
       wakeRecognition = null;
       if (e.error !== 'not-allowed') {
         if (!modoLlamada) setTimeout(() => iniciarWakeWord(), 600);
       }
     };
- 
+
     try { wakeRecognition.start(); } catch(e) { wakeRecognition = null; }
   }
- 
+
   function detenerWakeWord() {
     if (wakeRecognition) {
       try { wakeRecognition.abort(); } catch(e) {}
       wakeRecognition = null;
     }
   }
- 
+
   window.addEventListener('load', () => {
     setTimeout(() => iniciarWakeWord(), 2000);
   });
