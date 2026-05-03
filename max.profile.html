@@ -29,6 +29,7 @@
 </script>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://js.puter.com/v2/"></script>
 <style>
 :root {
   --bg:       #00010f;
@@ -802,40 +803,33 @@ INSTRUCCIONES ESPECIALES:
   let wakeRecognition = null;
   let currentAudio = null;
 
-  // ── HABLAR con salome ───────────────────────────────────
+  // ── HABLAR con Puter.js ───────────────────────────────────
   async function hablarSalome(texto) {
     if (!modoLlamada) return;
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+    // Detener audio anterior si existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+
     pararMic();
     maxHablando = true;
     setBtnHablando(true);
 
     try {
-      const res = await fetch("https://maxiarouter.pabloandresperlaza16.workers.dev", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "tts", texto, voz: "es-CO-SalomeNeural" })
-      });
-      if (!res.ok) throw new Error("Error TTS");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      currentAudio = new Audio(url);
-      currentAudio.onended = () => {
-        URL.revokeObjectURL(url);
-        currentAudio = null;
-        maxHablando = false;
-        setBtnHablando(false);
-        if (modoLlamada) setTimeout(() => iniciarMic(), 600);
-      };
-      currentAudio.onerror = () => {
-        currentAudio = null;
-        onVozTerminada();
-      };
-      currentAudio.play();
+      // Puter.js genera el audio y lo reproduce automáticamente
+      await puter.ai.txt2speech(texto, 'es-CO');
     } catch(e) {
-      console.warn("Edge TTS error:", e);
+      console.warn('Puter TTS error:', e);
+      // Fallback: Web Speech API si Puter falla
       fallbackVoz(texto);
+      return;
     }
+
+    maxHablando = false;
+    setBtnHablando(false);
+    if (modoLlamada) setTimeout(() => iniciarMic(), 600);
   }
 
   // ── FALLBACK Web Speech (por si Puter falla) ──────────────
